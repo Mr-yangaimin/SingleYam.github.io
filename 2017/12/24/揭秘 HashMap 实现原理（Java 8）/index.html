@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    
+
+    <title>
+       | 一个不羁而又平凡的码农 
+    </title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+      <meta name="author" content="Single">
+    
+    
+
+    <meta name="description" content="HashMap 作为一种容器类型，无论你是否了解过其内部的实现原理，它的大名已经频频出现在各种互联网面试中了。从基本的使用角度来说，它很简单，但从其内部的实现来看（尤其是 Java 8 的改进以来），它又并非想象中那么容易。如果你一定要问了解其内部实现与否对于写程序究竟有多大影响，我不能给出一个确切的答案。但是作为一名合格程序员，对于这种遍地都在谈论的技术不应该不为所动。本篇文章主要从 jdk 1">
+<meta property="og:type" content="article">
+<meta property="og:title" content=" | 一个不羁而又平凡的码农">
+<meta property="og:url" content="https://singleyam.github.io/2017/12/24/揭秘 HashMap 实现原理（Java 8）/index.html">
+<meta property="og:site_name" content="一个不羁而又平凡的码农">
+<meta property="og:description" content="HashMap 作为一种容器类型，无论你是否了解过其内部的实现原理，它的大名已经频频出现在各种互联网面试中了。从基本的使用角度来说，它很简单，但从其内部的实现来看（尤其是 Java 8 的改进以来），它又并非想象中那么容易。如果你一定要问了解其内部实现与否对于写程序究竟有多大影响，我不能给出一个确切的答案。但是作为一名合格程序员，对于这种遍地都在谈论的技术不应该不为所动。本篇文章主要从 jdk 1">
+<meta property="og:image" content="http://img.blog.csdn.net/20171205200000196?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171205210702910?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171206112420159?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:updated_time" content="2017-12-24T10:36:23.844Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content=" | 一个不羁而又平凡的码农">
+<meta name="twitter:description" content="HashMap 作为一种容器类型，无论你是否了解过其内部的实现原理，它的大名已经频频出现在各种互联网面试中了。从基本的使用角度来说，它很简单，但从其内部的实现来看（尤其是 Java 8 的改进以来），它又并非想象中那么容易。如果你一定要问了解其内部实现与否对于写程序究竟有多大影响，我不能给出一个确切的答案。但是作为一名合格程序员，对于这种遍地都在谈论的技术不应该不为所动。本篇文章主要从 jdk 1">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20171205200000196?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+    
+    
+    
+      <link rel="icon" type="image/x-icon" href="/favicon.png">
+    
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+
+</head>
+<body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="icon icon-list btn-mobile-menu__icon"></i>
+        <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+
+    
+
+<header class="panel-cover panel-cover--collapsed">
+
+
+  <div class="panel-main">
+
+  
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        
+
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">一个不羁而又平凡的码农</a></h1>
+        <hr class="panel-cover__divider" />
+
+        
+
+        <div class="navigation-wrapper">
+
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+
+            </ul>
+          </nav>
+
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+
+-------------------------------->
+
+<!-- add social info here -->
+
+
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner entry">
+            
+
+<article class="post-container post-container--single">
+
+  <header class="post-header">
+    
+    <h1 class="post-title"></h1>
+
+    
+
+    <div class="post-meta">
+      <time datetime="2017-12-24" class="post-meta__date date">2017-12-24</time> 
+
+      <span class="post-meta__tags tags">
+
+          
+
+          
+
+      </span>
+    </div>
+    
+    
+
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>HashMap 作为一种容器类型，无论你是否了解过其内部的实现原理，它的大名已经频频出现在各种互联网面试中了。从基本的使用角度来说，它很简单，但从其内部的实现来看（尤其是 Java 8 的改进以来），它又并非想象中那么容易。如果你一定要问了解其内部实现与否对于写程序究竟有多大影响，我不能给出一个确切的答案。但是作为一名合格程序员，对于这种遍地都在谈论的技术不应该不为所动。本篇文章主要从 jdk 1.8 的版本初步探寻 HashMap 的基本实现情况，主要涉及内容如下：</p>
+<ul>
+<li>HashMap 的基本组成成员</li>
+<li>put 方法的具体实现</li>
+<li>remove 方法的具体实现</li>
+<li>其他一些基本方法的基本介绍</li>
+</ul>
+<p><strong>一、HashMap 的基本组成成员</strong></p>
+<p>首先，HashMap 是 Map 的一个实现类，它代表的是一种键值对的数据存储形式。Key 不允许重复出现，Value 随意。jdk 8 之前，其内部是由数组+链表来实现的，而 jdk 8 对于链表长度超过 8 的链表将转储为红黑树。大致的数据存储形式如下：</p>
+<p><img src="http://img.blog.csdn.net/20171205200000196?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="图片来自网络"></p>
+<p>下面分别对其中的基本成员属性进行说明：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//默认的容量，即默认的数组长度 16</span><br><span class="line">static final int DEFAULT_INITIAL_CAPACITY = 1 &lt;&lt; 4;</span><br><span class="line">//最大的容量，即数组可定义的最大长度 </span><br><span class="line">static final int MAXIMUM_CAPACITY = 1 &lt;&lt; 30;</span><br></pre></td></tr></table></figure></p>
+<p>这就是上述提到的数组，数组的元素都是 Node 类型，数组中的每个 Node 元素都是一个链表的头结点，通过它可以访问连接在其后面的所有结点。其实你也应该发现，上述的容量指的就是这个数组的长度。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">transient Node&lt;K,V&gt;[] table;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//实际存储的键值对个数</span><br><span class="line">transient int size;</span><br><span class="line">//用于迭代防止结构性破坏的标量</span><br><span class="line">transient int modCount;</span><br></pre></td></tr></table></figure>
+<p>下面这三个属性是相关的，threshold 代表的是一个阈值，通常小于数组的实际长度。伴随着元素不断的被添加进数组，一旦数组中的元素数量达到这个阈值，那么表明数组应该被扩容而不应该继续任由元素加入。而这个阈值的具体值则由负载因子（loadFactor）和数组容量来决定，公式：threshold = capacity * loadFactor。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int threshold;</span><br><span class="line">final float loadFactor;</span><br><span class="line">//HashMap 中默认负载因子为 0.75</span><br><span class="line">static final float DEFAULT_LOAD_FACTOR = 0.75f;</span><br></pre></td></tr></table></figure></p>
+<p>好了，有关 HashMap 的基本属性大致介绍如上。下面我们看看它的几个重载的构造函数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public HashMap(int initialCapacity, float loadFactor) &#123;</span><br><span class="line">    if (initialCapacity &lt; 0)</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal initial capacity: &quot; + initialCapacity);</span><br><span class="line">    if (initialCapacity &gt; MAXIMUM_CAPACITY)</span><br><span class="line">        initialCapacity = MAXIMUM_CAPACITY;</span><br><span class="line">    if (loadFactor &lt;= 0 || Float.isNaN(loadFactor))</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal load factor: &quot; +loadFactor);</span><br><span class="line">    this.loadFactor = loadFactor;</span><br><span class="line">    this.threshold = tableSizeFor(initialCapacity);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是一个最基本的构造函数，需要调用方传入两个参数，initialCapacity 和 loadFactor。程序的大部分代码在判断传入参数的合法性，initialCapacity 小于零将抛出异常，大于 MAXIMUM_CAPACITY 将被限定为 MAXIMUM_CAPACITY。loadFactor 如果小于等于零或者非数字类型也会抛出异常。</p>
+<p>整个构造函数的核心在对 threshold  的初始化操作：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">static final int tableSizeFor(int cap) &#123;</span><br><span class="line">    int n = cap - 1;</span><br><span class="line">    n |= n &gt;&gt;&gt; 1;</span><br><span class="line">    n |= n &gt;&gt;&gt; 2;</span><br><span class="line">    n |= n &gt;&gt;&gt; 4;</span><br><span class="line">    n |= n &gt;&gt;&gt; 8;</span><br><span class="line">    n |= n &gt;&gt;&gt; 16;</span><br><span class="line">    return (n &lt; 0) ? 1 : (n &gt;= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是一个小巧但精妙的方法，这里通过异或的位运算将两个字节的 n 打造成比 cap 大但最接近 2 的 n 次幂的一个数值。例如：</p>
+<p><img src="http://img.blog.csdn.net/20171205210702910?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>这里我们表示 n 的时候使用了 7 个 x，所以无论 x 为 0 或者 1，n 的值都是大于 2 的 7 次幂的。我们从最终结果可以看到，最后的 n 被打造为 8 个 1，也就是 2 的 8 次幂减一。</p>
+<p>所以从宏观上看，传入的容量无论是处于任何范围，最终都会被打造成比该值大并且比最近的一个 2 的 n 次幂小一的值。为什么这么做？因为 2 的 n 次幂小一的值在二进制角度看全为 1，将有利于 HashMap 中的元素搜索，这一点我们后续将介绍。</p>
+<p>那么通过该方法，我们将获得一个 2 的整数次幂的容量的值，此处存放至 threshold，实际上我们获取的是一个有关数组容量的值，不应该存放至阈值 threshold 中，但在后续实际初始化数组的时候并不会受到影响，这里可能是写 jdk 的大神偷了一次懒吧。</p>
+<p>那么我们对于这个最基本的构造函数的介绍就已经结束了，当然，HashMap 中还有很多的重载构造函数，但几乎都是基于上述的构造函数的。例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public HashMap(int initialCapacity) &#123;</span><br><span class="line">    this(initialCapacity, DEFAULT_LOAD_FACTOR);</span><br><span class="line">&#125;</span><br><span class="line">public HashMap() &#123;</span><br><span class="line">    this.loadFactor = DEFAULT_LOAD_FACTOR;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后需要说明一点的是，以上的一些构造函数都没有直接的创建一个切实存在的数组，他们都是在为创建数组需要的一些参数做初始化，所以有些在构造函数中并没有被初始化的属性都会在实际初始化数组的时候用默认值替换。</p>
+<p><strong>二、put 方法的具体实现</strong></p>
+<p>put 方法的源码分析是本篇的一个重点，因为通过该方法我们可以窥探到 HashMap 在内部是如何进行数据存储的，所谓的数组+链表+红黑树的存储结构是如何形成的，又是在何种情况下将链表转换成红黑树来优化性能的。带着一系列的疑问，我们看这个 put 方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public V put(K key, V value) &#123;</span><br><span class="line">    return putVal(hash(key), key, value, false, true);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>添加一个元素只需要传入一个键和一个值即可，putVal 方法是关键，我已经在该方法中进行了基本的注释，具体的细节稍后详细说明，先从这些注释中大体上建立一个直观的感受。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">final V putVal(int hash, K key, V value, boolean onlyIfAbsent,boolean evict) &#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, i;</span><br><span class="line">    //如果 table 还未被初始化，那么初始化它</span><br><span class="line">    if ((tab = table) == null || (n = tab.length) == 0)</span><br><span class="line">        n = (tab = resize()).length;</span><br><span class="line">    //根据键的 hash 值找到该键对应到数组中存储的索引</span><br><span class="line">    //如果为 null，那么说明此索引位置并没有被占用</span><br><span class="line">    if ((p = tab[i = (n - 1) &amp; hash]) == null)</span><br><span class="line">        tab[i] = newNode(hash, key, value, null);</span><br><span class="line">    //不为 null，说明此处已经被占用，只需要将构建一个节点插入到这个链表的尾部即可</span><br><span class="line">    else &#123;</span><br><span class="line">        Node&lt;K,V&gt; e; K k;</span><br><span class="line">        //当前结点和将要插入的结点的 hash 和 key 相同，说明这是一次修改操作</span><br><span class="line">        if (p.hash == hash &amp;&amp;</span><br><span class="line">            ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">            e = p;</span><br><span class="line">		//如果 p 这个头结点是红黑树结点的话，以红黑树的插入形式进行插入</span><br><span class="line">        else if (p instanceof TreeNode)</span><br><span class="line">            e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);</span><br><span class="line">        //遍历此条链表，将构建一个节点插入到该链表的尾部</span><br><span class="line">        else &#123;</span><br><span class="line">            for (int binCount = 0; ; ++binCount) &#123;</span><br><span class="line">                if ((e = p.next) == null) &#123;</span><br><span class="line">                    p.next = newNode(hash, key, value, null);</span><br><span class="line">                    //如果插入后链表长度大于等于 8 ，将链表裂变成红黑树</span><br><span class="line">                    if (binCount &gt;= TREEIFY_THRESHOLD - 1)</span><br><span class="line">                        treeifyBin(tab, hash);</span><br><span class="line">                    break;</span><br><span class="line">                &#125;</span><br><span class="line">                //遍历的过程中，如果发现与某个结点的 hash和key，这依然是一次修改操作 </span><br><span class="line">                if (e.hash == hash &amp;&amp;</span><br><span class="line">                    ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">                    break;</span><br><span class="line">                p = e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        //e 不是 null，说明当前的 put 操作是一次修改操作并且e指向的就是需要被修改的结点</span><br><span class="line">        if (e != null) &#123; </span><br><span class="line">            V oldValue = e.value;</span><br><span class="line">            if (!onlyIfAbsent || oldValue == null)</span><br><span class="line">                e.value = value;</span><br><span class="line">            afterNodeAccess(e);</span><br><span class="line">            return oldValue;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ++modCount;</span><br><span class="line">    //如果添加后，数组容量达到阈值，进行扩容</span><br><span class="line">    if (++size &gt; threshold)</span><br><span class="line">        resize();</span><br><span class="line">    afterNodeInsertion(evict);</span><br><span class="line">    return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从整体上来看，该方法的大致处理逻辑已如上述注释说明，下面我们针对其中的细节进行详细的解释。</p>
+<p>首先，我们看 resize 这个方法是如何对 table 进行初始化的，代码比较多，分两部分进行解析：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">//第一部分</span><br><span class="line">final Node&lt;K,V&gt;[] resize() &#123;</span><br><span class="line">        Node&lt;K,V&gt;[] oldTab = table;</span><br><span class="line">        //拿到旧数组的长度</span><br><span class="line">        int oldCap = (oldTab == null) ? 0 : oldTab.length;</span><br><span class="line">        int oldThr = threshold;</span><br><span class="line">        int newCap, newThr = 0;</span><br><span class="line">        //说明旧数组已经被初始化完成了，此处需要给旧数组扩容</span><br><span class="line">        if (oldCap &gt; 0) &#123;</span><br><span class="line">		    //极限的限定，达到容量限定的极限将不再扩容</span><br><span class="line">            if (oldCap &gt;= MAXIMUM_CAPACITY) &#123;</span><br><span class="line">                threshold = Integer.MAX_VALUE;</span><br><span class="line">                return oldTab;</span><br><span class="line">            &#125;</span><br><span class="line">            //未达到极限，将数组容量扩大两倍，阈值也扩大两倍</span><br><span class="line">            else if ((newCap = oldCap &lt;&lt; 1) &lt; MAXIMUM_CAPACITY &amp;&amp;</span><br><span class="line">                     oldCap &gt;= DEFAULT_INITIAL_CAPACITY)</span><br><span class="line">                newThr = oldThr &lt;&lt; 1; </span><br><span class="line">        &#125;</span><br><span class="line">        //数组未初始化，但阈值不为 0，为什么不为 0 ？</span><br><span class="line">        //上述提到 jdk 大神偷懒的事情就指的这，构造函数根据传入的容量打造了一个合适的数组容量暂存在阈值中</span><br><span class="line">        //这里直接使用</span><br><span class="line">        else if (oldThr &gt; 0) </span><br><span class="line">            newCap = oldThr;</span><br><span class="line">        //数组未初始化并且阈值也为0，说明一切都以默认值进行构造</span><br><span class="line">        else &#123;</span><br><span class="line">            newCap = DEFAULT_INITIAL_CAPACITY;</span><br><span class="line">            newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);</span><br><span class="line">        &#125;</span><br><span class="line">        //这里也是在他偷懒的后续弥补</span><br><span class="line">        //newCap = oldThr 之后并没有计算阈值，所以 newThr = 0</span><br><span class="line">        if (newThr == 0) &#123;</span><br><span class="line">            float ft = (float)newCap * loadFactor;</span><br><span class="line">            newThr = (newCap &lt; MAXIMUM_CAPACITY &amp;&amp; ft &lt; (float)MAXIMUM_CAPACITY ?</span><br><span class="line">                      (int)ft : Integer.MAX_VALUE);</span><br><span class="line">        &#125;</span><br><span class="line">        threshold = newThr;</span><br><span class="line">****************后续代码......*******</span><br></pre></td></tr></table></figure>
+<p>这一部分代码结束后，无论是初始化数组还是扩容，总之，必需的数组容量和阈值都已经计算完成了。下面看后续的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">************第一部分代码.....************</span><br><span class="line">//根据新的容量初始化一个数组</span><br><span class="line">Node&lt;K,V&gt;[] newTab = (Node&lt;K,V&gt;[])new Node[newCap];</span><br><span class="line">table = newTab;</span><br><span class="line">//旧数组不为 null，这次的 resize 是一次扩容行为</span><br><span class="line">if (oldTab != null) &#123;</span><br><span class="line">	//将旧数组中的每个节点位置相对静止地拷贝值新数组中</span><br><span class="line">    for (int j = 0; j &lt; oldCap; ++j) &#123;</span><br><span class="line">        Node&lt;K,V&gt; e;</span><br><span class="line">        //获取头结点</span><br><span class="line">        if ((e = oldTab[j]) != null) &#123;</span><br><span class="line">            oldTab[j] = null;</span><br><span class="line">	        //说明链表或者红黑树只有一个头结点，转移至新表</span><br><span class="line">            if (e.next == null)</span><br><span class="line">                newTab[e.hash &amp; (newCap - 1)] = e;</span><br><span class="line">            //如果 e 是红黑树结点，红黑树分裂，转移至新表</span><br><span class="line">            else if (e instanceof TreeNode)</span><br><span class="line">                ((TreeNode&lt;K,V&gt;)e).split(this, newTab, j, oldCap);</span><br><span class="line">            //这部分是将链表中的各个节点原序地转移至新表中，我们后续会详细说明</span><br><span class="line">            else &#123; </span><br><span class="line">                Node&lt;K,V&gt; loHead = null, loTail = null;</span><br><span class="line">                Node&lt;K,V&gt; hiHead = null, hiTail = null;</span><br><span class="line">                Node&lt;K,V&gt; next;</span><br><span class="line">                do &#123;</span><br><span class="line">                    next = e.next;</span><br><span class="line">                    if ((e.hash &amp; oldCap) == 0) &#123;</span><br><span class="line">                        if (loTail == null)</span><br><span class="line">                            loHead = e;</span><br><span class="line">                        else</span><br><span class="line">                            loTail.next = e;</span><br><span class="line">                        loTail = e;</span><br><span class="line">                    &#125;</span><br><span class="line">                    else &#123;</span><br><span class="line">                        if (hiTail == null)</span><br><span class="line">                            hiHead = e;</span><br><span class="line">                        else</span><br><span class="line">                            hiTail.next = e;</span><br><span class="line">                        hiTail = e;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; while ((e = next) != null);</span><br><span class="line">                if (loTail != null) &#123;</span><br><span class="line">                    loTail.next = null;</span><br><span class="line">                    newTab[j] = loHead;</span><br><span class="line">                &#125;</span><br><span class="line">                if (hiTail != null) &#123;</span><br><span class="line">                    hiTail.next = null;</span><br><span class="line">                newTab[j + oldCap] = hiHead;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">//不论你是扩容还是初始化，都可以返回 newTab</span><br><span class="line">return newTab;</span><br></pre></td></tr></table></figure>
+<p>对于第二部分的代码段来说，主要完成的是将旧链表中的各个节点按照原序地复制到新数组中。关于头结点是红黑树的情况我们暂时不去涉及，下面重点介绍下链表的拷贝和优化代码块，这部分代码不再重复贴出，此处直接进行分析，有需要的可以参照上述列出的代码块或者自己的 jdk 进行理解。</p>
+<p>这部分其实是一个优化操作，将当前链表上的一些结点移出来向刚扩容的另一半存储空间放。</p>
+<p>一般我们有如下公式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">index = e.hash &amp; (oldCap - 1)</span><br></pre></td></tr></table></figure>
+<p><img src="http://img.blog.csdn.net/20171206112420159?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>随便举个例子，此时的 e 在容量扩大两倍以后的索引值没有变化，所以这部分结点是不需要移动的，那么程序如何判断扩容前后的 index 是否相等呢？<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//oldCap 一定是 100...000 的形式</span><br><span class="line">if ((e.hash &amp; oldCap) == 0)</span><br></pre></td></tr></table></figure></p>
+<p>如果原 oldCap 为 10000 的话，那么扩容后的 newCap 则为 100000，会比原来多出一位。所以我们只要知道原索引值的前一位是 0 还是 1 即可，如果是 0，那么它和新容量与后还是 0 并不改变索引的值，如果是 1 的话，那么索引值会增加 oldCap。</p>
+<p>这样就分两步拆分当前链表，一条链表是不需要移动的，依然保存在当前索引值的结点上，另一条则需要变动到 index + oldCap 的索引位置上。</p>
+<p>这里我们只介绍了普通链表的分裂情况，至于红黑树的裂变其实是类似的，依然分出一些结点到 index + oldCap 的索引位置上，只不过遍历的方式不同而已。</p>
+<p>这样，我们对于 resize 这个扩容的方法已经解析完成了，下面接着看 putVal 方法，篇幅比较长，该方法的源码已经在介绍 resize 之前贴出，建议读者根据自己的 jdk 对照着理解。</p>
+<p>上面我们说到，如果在 put 一个元素的时候判断内部的 table 数组还未初始化，那么调用 resize 根据相应的参数信息初始化数组。接下来的这个判断语句就很简单了：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if ((p = tab[i = (n - 1) &amp; hash]) == null)</span><br><span class="line">   tab[i] = newNode(hash, key, value, null);</span><br></pre></td></tr></table></figure>
+<p>根据键的 hash 值找到对应的索引位置，如果该位置为 null，说明还没有头结点，于是 newNode 并存储在该位置上。</p>
+<p>否则的话说明该位置已经有头结点了，或者说已经存在一个链表或红黑树了，那么我们要做的只是新建一个节点添加到链表或者红黑树的最后位置即可。</p>
+<p>第一步，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if (p.hash == hash &amp;&amp;((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">      e = p;</span><br></pre></td></tr></table></figure>
+<p>p 指向当前节点，如果我们要插入的节点的键以及键所对应的 hash 值和 p 节点完全一样的话，那么说明这次 put 是一次修改操作，新建一个引用指向这个需要修改的节点。</p>
+<p>第二步，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">else if (p instanceof TreeNode)</span><br><span class="line">     e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);</span><br></pre></td></tr></table></figure>
+<p>如果当前 p 节点是红黑树结点，那么需要调用不同于链表的的添加节点的方法来添加一个节点到红黑树中。（主要是维持平衡，建议读者去了解下红黑树，此处没有深谈是限于它的复杂度和文章篇幅）。</p>
+<p>第三步，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">else &#123;</span><br><span class="line">     for (int binCount = 0; ; ++binCount) &#123;</span><br><span class="line">     if ((e = p.next) == null) &#123;</span><br><span class="line">         p.next = newNode(hash, key, value, null);</span><br><span class="line">         if (binCount &gt;= TREEIFY_THRESHOLD - 1) </span><br><span class="line">             treeifyBin(tab, hash);</span><br><span class="line">         break;</span><br><span class="line">     &#125;</span><br><span class="line">    if (e.hash == hash &amp;&amp;((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">         break;</span><br><span class="line">    p = e;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里主要处理的是向普通链表的末尾添加一个新的结点，e 不断地往后移动，如果发现 e 为 null，那么说明已经到链表的末尾了，那么新建一个节点添加到链表的末尾即可，因为 p 是 e 的父节点，所以直接让 p.next 指向新节点即可。添加之后，如果发现链表长度超过 8，那么将链表转储成红黑树。</p>
+<p>在遍历的过程中，如果发现 e 所指向的当前结点和我们即将插入的节点信息完全匹配，那么也说明这是一次修改操作，由于 e 已经指向了该需要被修改的结点，所以直接 break 即可。</p>
+<p>那么最终，无论是第一步中找到的头节点即需要被修改的节点，还是第三步在遍历中找到的需要被修改的节点，它们的引用都是 e，此时我们只需要用传入的 Value 值替换 e 指向的节点的 value 即可。正如这段代码一样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">if (e != null) &#123; // existing mapping for key</span><br><span class="line">     V oldValue = e.value;</span><br><span class="line">     if (!onlyIfAbsent || oldValue == null)</span><br><span class="line">          e.value = value;</span><br><span class="line">     afterNodeAccess(e);</span><br><span class="line">     return oldValue;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>如果 e 为 null，那更简单了，说明此次 put 是添加新元素并且新元素也已经在上述代码中被添加到 HashMap 中了，我们只需要关心下，新加入一个元素后是否达到数组的阈值，如果是则调用 resize 方法扩大数组容量。该方法已经详细阐述过，此处不再赘述。</p>
+<p>所以，这个 put 方法是集添加与修改一体的一个方法，如果执行的是添加操作则会返回 null，是修改操作则会返回旧结点的 value 值。</p>
+<p>那么至此，我们对添加操作的内部实现想必已经了解的不错了，接下来看看删除操作的内部实现。</p>
+<p><strong>三、remove 方法的具体实现</strong></p>
+<p>删除操作就是一个查找+删除的过程，相对于添加操作其实容易一些，但那是你基于上述添加方法理解的不错的前提下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public V remove(Object key) &#123;</span><br><span class="line">    Node&lt;K,V&gt; e;</span><br><span class="line">    return (e = removeNode(hash(key), key, null, false, true)) == null ?</span><br><span class="line">        null : e.value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据键值删除指定节点，这是一个最常见的操作了。显然，removeNode 方法是核心。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">final Node&lt;K,V&gt; removeNode(int hash, Object key, Object value,boolean matchValue, boolean movable) &#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, index;</span><br><span class="line">    if ((tab = table) != null &amp;&amp; (n = tab.length) &gt; 0 &amp;&amp;</span><br><span class="line">        (p = tab[index = (n - 1) &amp; hash]) != null) &#123;</span><br><span class="line">        Node&lt;K,V&gt; node = null, e; K k; V v;</span><br><span class="line">        if (p.hash == hash &amp;&amp;</span><br><span class="line">            ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">            node = p;</span><br><span class="line">        else if ((e = p.next) != null) &#123;</span><br><span class="line">            if (p instanceof TreeNode)</span><br><span class="line">                node = ((TreeNode&lt;K,V&gt;)p).getTreeNode(hash, key);</span><br><span class="line">            else &#123;</span><br><span class="line">                do &#123;</span><br><span class="line">                    if (e.hash == hash &amp;&amp;</span><br><span class="line">                        ((k = e.key) == key ||</span><br><span class="line">                         (key != null &amp;&amp; key.equals(k)))) &#123;</span><br><span class="line">                        node = e;</span><br><span class="line">                        break;</span><br><span class="line">                    &#125;</span><br><span class="line">                    p = e;</span><br><span class="line">                &#125; while ((e = e.next) != null);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        if (node != null &amp;&amp; (!matchValue || (v = node.value) == value ||(value != null &amp;&amp; value.equals(v)))) &#123;</span><br><span class="line">            if (node instanceof TreeNode)      				                                                  ((TreeNode&lt;K,V&gt;)node).removeTreeNode(this, tab, movable);</span><br><span class="line">            else if (node == p)</span><br><span class="line">                tab[index] = node.next;</span><br><span class="line">            else</span><br><span class="line">                p.next = node.next;</span><br><span class="line">            ++modCount;</span><br><span class="line">            --size;</span><br><span class="line">            afterNodeRemoval(node);</span><br><span class="line">            return node;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>删除操作需要保证在表不为空的情况下进行，并且 p 节点根据键的 hash 值对应到数组的索引，在该索引处必定有节点，如果为 null ，那么间接说明此键所对应的结点并不存在于整个 HashMap 中，这是不合法的，所以首先要在这两个大前提下才能进行删除结点的操作。</p>
+<p>第一步，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if (p.hash == hash &amp;&amp;((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">     node = p;</span><br></pre></td></tr></table></figure>
+<p>需要删除的结点就是这个头节点，让 node 引用指向它。否则说明待删除的结点在当前 p 所指向的头节点的链表或红黑树中，于是需要我们遍历查找。</p>
+<p>第二步，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">else if ((e = p.next) != null) &#123;</span><br><span class="line">     if (p instanceof TreeNode)</span><br><span class="line">          node = ((TreeNode&lt;K,V&gt;)p).getTreeNode(hash, key);</span><br><span class="line">     else &#123;</span><br><span class="line">         do &#123;</span><br><span class="line">              if (e.hash == hash &amp;&amp;((k = e.key) == key ||(key != null &amp;&amp; key.equals(k)))) &#123;</span><br><span class="line">                     node = e;</span><br><span class="line">              break;</span><br><span class="line">         &#125;</span><br><span class="line">         p = e;</span><br><span class="line">         &#125; while ((e = e.next) != null);</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果头节点是红黑树结点，那么调用红黑树自己的遍历方法去得到这个待删结点。否则就是普通链表，我们使用 do while 循环去遍历找到待删结点。找到节点之后，接下来就是删除操作了。</p>
+<p>第三步，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">if (node != null &amp;&amp; (!matchValue || (v = node.value) == value ||(value != null &amp;&amp; value.equals(v)))) &#123;</span><br><span class="line">       if (node instanceof TreeNode)</span><br><span class="line">                    ((TreeNode&lt;K,V&gt;)node).removeTreeNode(this, tab, movable);</span><br><span class="line">       else if (node == p)</span><br><span class="line">            tab[index] = node.next;</span><br><span class="line">       else</span><br><span class="line">            p.next = node.next;</span><br><span class="line">       ++modCount;</span><br><span class="line">       --size;</span><br><span class="line">       afterNodeRemoval(node);</span><br><span class="line">       return node;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>删除操作也很简单，如果是红黑树结点的删除，直接调用红黑树的删除方法进行删除即可，如果是待删结点就是一个头节点，那么用它的 next 结点顶替它作为头节点存放在 table[index] 中，如果删除的是普通链表中的一个节点，用该结点的前一个节点直接跳过该待删结点指向它的 next 结点即可。</p>
+<p>最后，如果 removeNode 方法删除成功将返回被删结点，否则返回 null。</p>
+<p>这样，相对复杂的 put 和 remove 方法的内部实现，我们已经完成解析了。下面看看其他常用的方法实现，它们或多或少都于这两个方法有所关联。</p>
+<p><strong>四、其他常用的方法介绍</strong></p>
+<p>除了常用的 put 和 remove 两个方法外，HashMap 中还有一些好用的方法，下面我们简单的学习下它们。</p>
+<p><strong>1、clear</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public void clear() &#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab;</span><br><span class="line">    modCount++;</span><br><span class="line">    if ((tab = table) != null &amp;&amp; size &gt; 0) &#123;</span><br><span class="line">        size = 0;</span><br><span class="line">        for (int i = 0; i &lt; tab.length; ++i)</span><br><span class="line">            tab[i] = null;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法调用结束后将清除 HashMap 中存储的所有元素。</p>
+<p><strong>2、keySet</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//实例属性 keySet</span><br><span class="line">transient volatile Set&lt;K&gt;        keySet;</span><br><span class="line"></span><br><span class="line">public Set&lt;K&gt; keySet() &#123;</span><br><span class="line">    Set&lt;K&gt; ks;</span><br><span class="line">    return (ks = keySet) == null ? (keySet = new KeySet()) : ks;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">final class KeySet extends AbstractSet&lt;K&gt; &#123;</span><br><span class="line">    public final int size()                 &#123; return size; &#125;</span><br><span class="line">    public final void clear()               &#123; HashMap.this.clear(); &#125;</span><br><span class="line">    public final Iterator&lt;K&gt; iterator()     &#123; return new KeyIterator(); &#125;</span><br><span class="line">    public final boolean contains(Object o) &#123; return containsKey(o); &#125;</span><br><span class="line">    public final boolean remove(Object key) &#123;</span><br><span class="line">        return removeNode(hash(key), key, null, false, true) != null;</span><br><span class="line">    &#125;</span><br><span class="line">    public final Spliterator&lt;K&gt; spliterator() &#123;</span><br><span class="line">        return new KeySpliterator&lt;&gt;(HashMap.this, 0, -1, 0, 0);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>HashMap 中定义了一个 keySet 的实例属性，它保存的是整个 HashMap 中所有键的集合。上述所列出的 KeySet 类是 Set 的一个实现类，它负责为我们提供有关 HashMap 中所有对键的操作。</p>
+<p>可以看到，KeySet 中的所有的实例方法都依赖当前的 HashMap 实例，也就是说，我们对返回的 keySet 集中的任意一个操作都会直接映射到当前 HashMap 实例中，例如你执行删除一个键的操作，那么 HashMap 中将会少一个节点。 </p>
+<p><strong>3、values</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public Collection&lt;V&gt; values() &#123;</span><br><span class="line">    Collection&lt;V&gt; vs;</span><br><span class="line">    return (vs = values) == null ? (values = new Values()) : vs;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>values 方法其实和 keySet 方法类似，它返回了所有节点的 value 属性所构成的 Collection 集合，此处不再赘述。</p>
+<p><strong>4、entrySet</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public Set&lt;Map.Entry&lt;K,V&gt;&gt; entrySet() &#123;</span><br><span class="line">    Set&lt;Map.Entry&lt;K,V&gt;&gt; es;</span><br><span class="line">    return (es = entrySet) == null ? (entrySet = new EntrySet()) : es;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>它返回的是所有节点的集合，或者说是所有的键值对集合。</p>
+<p><strong>5、get</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public V get(Object key) &#123;</span><br><span class="line">    Node&lt;K,V&gt; e;</span><br><span class="line">    return (e = getNode(hash(key), key)) == null ? null : e.value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>get 方法的内部实现其实是我们介绍过的 put 方法中的一部分，所以此处也不再赘述。</p>
+<p>至此，我们简单的解析了 HashMap 的内部实现，虽然说并没有面面俱到，但是最基本的、最核心的部分应该是叙述清晰的。总结不到之处，望不吝赐教！</p>
+
+  </section>
+
+  <section class="post-comments">
+
+    <!-- 将评论系统（例如Disqus、多说、友言、畅言等）提供的代码片段粘贴在这里 -->
+    
+</section>
+
+
+</article>
+
+
+            <footer class="footer">
+
+    <span class="footer__copyright">&copy; 2014-2015. | 由<a href="https://hexo.io/">Hexo</a>强力驱动 | 主题<a href="https://github.com/someus/huno">Huno</a></span>
+    
+</footer>
+        </div>
+    </div>
+
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+
+</body>
+</html>
