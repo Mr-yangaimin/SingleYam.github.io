@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    
+
+    <title>
+       | 一个不羁而又平凡的码农 
+    </title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+      <meta name="author" content="Single">
+    
+    
+
+    <meta name="description" content="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;前面的一系列文章中，我们总结了三大框架：Struts2，Hibernate，Spring 的基本知识。本篇就姑且尝试着使用 Maven 这个项目构建工具来将这三个框架整合一起。说到这里，如果有对 Maven 还不熟悉的同学，此处推荐下面两个链接快速了解下，记得回来！ Maven 是什么？如何给小白说明 Maven 是什么？  我对 Mav">
+<meta property="og:type" content="article">
+<meta property="og:title" content=" | 一个不羁而又平凡的码农">
+<meta property="og:url" content="https://singleyam.github.io/2017/12/24/Maven 整合 SSH 框架/index.html">
+<meta property="og:site_name" content="一个不羁而又平凡的码农">
+<meta property="og:description" content="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;前面的一系列文章中，我们总结了三大框架：Struts2，Hibernate，Spring 的基本知识。本篇就姑且尝试着使用 Maven 这个项目构建工具来将这三个框架整合一起。说到这里，如果有对 Maven 还不熟悉的同学，此处推荐下面两个链接快速了解下，记得回来！ Maven 是什么？如何给小白说明 Maven 是什么？  我对 Mav">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124104541483?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124112043279?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124143903341?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124144501248?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124152753190?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124152802087?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124170950742?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124173357062?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124173405203?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124173811850?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124173819109?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124192959695?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124193409315?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124194031232?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124194319622?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124205951808?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124201454188?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171124202204016?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171125094007651?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171125094144410?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171125094152772?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171125094233725?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20171125094241098?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:updated_time" content="2017-12-24T11:27:19.747Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content=" | 一个不羁而又平凡的码农">
+<meta name="twitter:description" content="&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;前面的一系列文章中，我们总结了三大框架：Struts2，Hibernate，Spring 的基本知识。本篇就姑且尝试着使用 Maven 这个项目构建工具来将这三个框架整合一起。说到这里，如果有对 Maven 还不熟悉的同学，此处推荐下面两个链接快速了解下，记得回来！ Maven 是什么？如何给小白说明 Maven 是什么？  我对 Mav">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20171124104541483?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+    
+    
+    
+      <link rel="icon" type="image/x-icon" href="/favicon.png">
+    
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+
+</head>
+<body>
+
+    <span class="mobile btn-mobile-menu">
+        <i class="icon icon-list btn-mobile-menu__icon"></i>
+        <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+
+    
+
+<header class="panel-cover panel-cover--collapsed">
+
+
+  <div class="panel-main">
+
+  
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+
+        
+
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">一个不羁而又平凡的码农</a></h1>
+        <hr class="panel-cover__divider" />
+
+        
+
+        <div class="navigation-wrapper">
+
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+
+            </ul>
+          </nav>
+
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+
+-------------------------------->
+
+<!-- add social info here -->
+
+
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+        <div class="content-wrapper__inner entry">
+            
+
+<article class="post-container post-container--single">
+
+  <header class="post-header">
+    
+    <h1 class="post-title"></h1>
+
+    
+
+    <div class="post-meta">
+      <time datetime="2017-12-24" class="post-meta__date date">2017-12-24</time> 
+
+      <span class="post-meta__tags tags">
+
+          
+
+          
+
+      </span>
+    </div>
+    
+    
+
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;前面的一系列文章中，我们总结了三大框架：Struts2，Hibernate，Spring 的基本知识。本篇就姑且尝试着使用 Maven 这个项目构建工具来将这三个框架整合一起。说到这里，如果有对 Maven 还不熟悉的同学，此处推荐下面两个链接快速了解下，记得回来！</p>
+<p><a href="http://blog.csdn.net/u012152619/article/details/51473380" target="_blank" rel="noopener">Maven 是什么？</a><br><a href="https://www.zhihu.com/question/32240102?sort=created" target="_blank" rel="noopener">如何给小白说明 Maven 是什么？</a> </p>
+<p>我对 Maven 的理解就是，它是一个工具能提供两大主要功能，其一是依赖管理，其二是项目构建。</p>
+<p>所谓的依赖管理就是指，我们对于框架中的 jar 包从此不需要手动的添加到项目中来，而是使用 Maven 的语法进行引用，当然在打包发布的时候，这些包还是会被加入进来，但是在我们的源代码中就不存在任何的 jar 包，整个项目轻量可移植性强。</p>
+<p>而所谓的项目构建指的是，对项目进行编译，测试，打包，发布等。原先我们是通过 IDE 来完成这样的工作，但是不同的 IDE 有不同的使用操作，但是如果你是 Maven 项目的话，无论你在哪种 IDE 中编码，都可以使用相同的 Maven 命令进行上述的几种操作，这其实在一定程度上减少了我们对 IDE 的依赖。</p>
+<p>上述我们简单介绍了 Maven 这个项目管理工具，具体深入的学习不是本篇的重点，本篇着重完成对 SSH 框架整合的一个操作，主要涉及以下内容：</p>
+<ul>
+<li>分别配置各个框架的运行环境</li>
+<li>了解整个 Web 项目配置文件的加载顺序</li>
+<li>Spring 整合 Struts2</li>
+<li>Spring 整合 Hibernate</li>
+<li>创建Action，Service，Dao 模拟登录过程</li>
+<li>项目的模块分离与再聚合</li>
+</ul>
+<p><strong>一、分别配置各个框架的运行环境</strong></p>
+<p>首先，我们先将三个框架各自的运行环境都配置到我们的 web 项目中。</p>
+<p>创建一个 Maven 的 web 工程，基本的目录结构大致是这样的：</p>
+<p><img src="http://img.blog.csdn.net/20171124104541483?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="web 项目的基本目录结构"></p>
+<p>然后我们先来配置 struts2 的运行环境。<br>第一步，pom.xml 中依赖 struts2 的核心包：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">   &lt;groupId&gt;org.apache.struts&lt;/groupId&gt;</span><br><span class="line">   &lt;artifactId&gt;struts2-core&lt;/artifactId&gt;</span><br><span class="line">   &lt;version&gt;2.3.32&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>由于 Maven 会自动引入该核心包所依赖的其他 jar 包，所以我们无需在手动依赖其他任何 jar 包。</p>
+<p>第二步，web.xml 中配置核心过滤器：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--配置Struts的核心过滤器--&gt;</span><br><span class="line">&lt;filter&gt;</span><br><span class="line">  &lt;filter-name&gt;struts&lt;/filter-name&gt;</span><br><span class="line">  &lt;filter-class&gt;org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter&lt;/filter-class&gt;&lt;/filter&gt;</span><br><span class="line"></span><br><span class="line">&lt;filter-mapping&gt;</span><br><span class="line">  &lt;filter-name&gt;struts&lt;/filter-name&gt;</span><br><span class="line">  &lt;url-pattern&gt;/*&lt;/url-pattern&gt;</span><br><span class="line">&lt;/filter-mapping&gt;</span><br></pre></td></tr></table></figure>
+<p>第三步，创建 struts.xml 用于配置控制器 Action。</p>
+<p>至此，struts2 的运行环境已经配置完成，下面我们看 Hibernate 运行环境的配置。<br>第一步，依赖相关的 jar 包，我们看看 Hibernate 需要依赖哪些 jar 包？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//mysql 驱动的依赖</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">   &lt;groupId&gt;mysql&lt;/groupId&gt;</span><br><span class="line">   &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;</span><br><span class="line">   &lt;version&gt;6.0.6&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">//Hibernate 核心包依赖</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">   &lt;groupId&gt;org.hibernate&lt;/groupId&gt;</span><br><span class="line">   &lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;</span><br><span class="line">   &lt;version&gt;4.3.11.Final&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>同样，hibernate 核心包需要依赖的其他 jar 包，Maven 会为我们自动查询并引入。</p>
+<p> 第二步，创建 Hibernate 核心配置文件 hibernate.cfg.xml 并完成基本信息的配置。</p>
+<p><img src="http://img.blog.csdn.net/20171124112043279?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>需要说明一点的是，为了简单起见，这里我们并没有使用数据源进行数据库的连接，等到与 Spring 整合的时候会使用数据源配置数据库连接。</p>
+<p>至此，Hibernate 的基本环境也已经配置完成，下面我们看 Spring 的环境配置。</p>
+<p>第一步，引入 Spring 相关依赖：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.springframework&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;spring-core&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;4.0.0.RELEASE&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.springframework&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;spring-beans&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;4.0.0.RELEASE&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.springframework&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;spring-expression&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;4.0.0.RELEASE&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.springframework&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;spring-context&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;4.0.0.RELEASE&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">    </span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.springframework&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;spring-web&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;4.0.0.RELEASE&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>第二步，创建 Spring 核心配置文件 applicationContext.xml 。</p>
+<p>第三步，web.xml 中创建 Spring 的配置文件加载 Listener，它的具体作用我们下一小节进行介绍。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--配置Spring监听器--&gt;</span><br><span class="line">&lt;listener&gt;</span><br><span class="line">    &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListene&lt;/listener-class&gt;</span><br><span class="line">&lt;/listener&gt;</span><br><span class="line">&lt;context-param&gt;</span><br><span class="line">    &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;</span><br><span class="line">    &lt;param-value&gt;classpath:applicationContext.xml&lt;/param-value&gt;</span><br><span class="line">&lt;/context-param&gt;</span><br></pre></td></tr></table></figure>
+<p>这样，三个框架各自的运行环境就已经创建完成了，但是显然它们现在是不能整合共同工作的。整个项目的目录结构如下：</p>
+<p><img src="http://img.blog.csdn.net/20171124143903341?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p><strong>二、了解整个 Web 项目配置文件的加载顺序</strong></p>
+<p>如果上述操作无误的话，现在我们的 web.xml 配置文件中起码应该是这样的：</p>
+<p><img src="http://img.blog.csdn.net/20171124144501248?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>当整个 web 应用启动时，首先会去加载 web.xml ，其中会启动 struts 的核心过滤器，然后我们的 Spring 监听器监听到 web 容器启动后，会根据 ServletContext 中保存的我们的配置参数信息去加载 Spring 的配置文件。而一般来说，Spring 整合 Hibernate 之后，Spring 的配置文件中会指明去加载 Hibernate 的配置文件，更具体的我们下文会详细介绍，此处只需要了解 Spring 配置文件中会去加载 Hibernate 的核心配置文件。</p>
+<p>那么，这样的话，我们三个框架的核心配置文件已经能够按顺序加载了。下面我们两两整合框架，先进行 Spring 与 Struts2 的整合。</p>
+<p><strong>三、Spring 整合 Struts2</strong></p>
+<p>Spring 与 Struts2 整合的核心点在于，将 Struts2 的 Action 交由 Spring 的 IOC 容器来创建。我们先创建一个 Action，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//index.jsp</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action=&quot;login&quot; method=&quot;post&quot;&gt;</span><br><span class="line">        姓名：&lt;input type=&quot;text&quot; name=&quot;name&quot; /&gt;&lt;br/&gt;</span><br><span class="line">        &lt;input type=&quot;submit&quot; value=&quot;提交&quot; /&gt;</span><br><span class="line">    &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class LoginAction extends ActionSupport &#123;</span><br><span class="line"></span><br><span class="line">    private String name;</span><br><span class="line">	//省略getter，setter方法</span><br><span class="line">    public String execute()&#123;</span><br><span class="line">        if(&quot;single&quot;.equals(this.name))&#123;</span><br><span class="line">            return SUCCESS;</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            return ERROR;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Spring 中配置该 Action 的实例信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bean id=&quot;login_action&quot; class=&quot;Actions.LoginAction&quot; scope=&quot;prototype&quot;&gt;</span><br><span class="line">        </span><br><span class="line">&lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>接下来在 struts.xml 中引用该 bean 即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;package name=&quot;myPackage&quot; extends=&quot;struts-default&quot;&gt;</span><br><span class="line">    &lt;action name=&quot;login&quot; class=&quot;login_action&quot;&gt;</span><br><span class="line">        &lt;result name=&quot;success&quot;&gt;/welcom.jsp&lt;/result&gt;</span><br><span class="line">        &lt;result name=&quot;error&quot;&gt;/error.jsp&lt;/result&gt;</span><br><span class="line">    &lt;/action&gt;</span><br><span class="line">&lt;/package&gt;</span><br></pre></td></tr></table></figure>
+<p>注意我们这里 action 标签中的 class 属性已经不再指向具体的 Action 类了，它指向的是 Spring 中的实例 bean。</p>
+<p>至此，对于 Struts2 和 Spring 的整合大致上结束了，为什么说大致呢？当你启动 web 容器运行上述程序时，会报错：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Unable to load configuration. - action .....</span><br></pre></td></tr></table></figure>
+<p>告诉你无法加载 struts.xml 配置文件，其实就是 action 的 class 属性对应的类找不到的意思。解决办法是，添加一个 Spring 插件依赖，该插件会让容器在找不到对应的实体类的时候，去 Spring IOC 容器中找。具体依赖是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.apache.struts&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;struts2-spring-plugin&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;2.3.15.1&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>然后我们启动 web 容器测试我们的整合效果。</p>
+<p><img src="http://img.blog.csdn.net/20171124152753190?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"><br><img src="http://img.blog.csdn.net/20171124152802087?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>整合成功！ Struts2 与 Spring 的整合还算简单，Spring 整合 Hibernate 则相对复杂一些。</p>
+<p><strong>四、Spring 整合 Hibernate</strong></p>
+<p>整合 Hibernate 的第一步依然是依赖相关 jar 包。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//MySQL 驱动包</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;mysql&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;6.0.6&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">//c3p0 </span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;com.mchange&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;c3p0&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;0.9.5&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>第二步是配置数据源和 session 工厂。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--读取属性配置文件内容--&gt;</span><br><span class="line">&lt;context:property-placeholder location=&quot;classpath:db.properties&quot;/&gt;</span><br><span class="line">&lt;!--配置c3p0数据源--&gt;</span><br><span class="line">&lt;bean id=&quot;dataSource&quot; class=&quot;com.mchange.v2.c3p0.ComboPooledDataSource&quot;&gt;</span><br><span class="line">    &lt;property name=&quot;driverClass&quot; value=&quot;$&#123;diverClass&#125;&quot;/&gt;</span><br><span class="line">    &lt;property name=&quot;jdbcUrl&quot; value=&quot;$&#123;jdbcUrl&#125;&quot;/&gt;</span><br><span class="line">    &lt;property name=&quot;user&quot; value=&quot;$&#123;user&#125;&quot;/&gt;</span><br><span class="line">    &lt;property name=&quot;password&quot; value=&quot;$&#123;password&#125;&quot;/&gt;</span><br><span class="line">&lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>创建一个属性文件保存 jdbc 连接的基本信息，连接驱动，连接 url，用户名，密码等。然后我们在 Spring 配置文件中配置了一个单例的数据源，它负责创建于数据库的连接。</p>
+<p>接着配置一个 SessionFactory 实例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--配置session工厂--&gt;</span><br><span class="line">&lt;bean id=&quot;sessionFactory&quot; class=&quot;org.springframework.orm.hibernate4.LocalSessionFactoryBean&quot;&gt;</span><br><span class="line">    &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot;/&gt;</span><br><span class="line">    &lt;property name=&quot;configLocations&quot; value=&quot;classpath:hibernate.cfg.xml&quot;/&gt;</span><br><span class="line">&lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>创建 session 工厂的时候会去加载 Hibernate 的核心配置文件，这里我们通过注入 configLocations 属性的值告诉 Spring 该文件的位置。这里还需要引入一个在 Spring 配置文件中支持 Hibernate 相关操作的一个插件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.springframework&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;spring-orm&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;4.0.0.RELEASE&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>Spring 对 Hibernate 的整合也基本结束，下面我们通过模拟一个登陆操作来初步体验下整合后框架的整体运行过程。</p>
+<p><strong>五、模拟登录过程</strong></p>
+<p>为了项目之间各个模块的耦合性低，我们通常会选择将整个项目分分层，Action 控制器拦截请求，Service 处理业务，Dao 完成对数据的存取。</p>
+<p><img src="http://img.blog.csdn.net/20171124170950742?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>MyDao 中封装着我们对于数据库的所有操作，MyService 中封装着我们所有的业务逻辑。我们先在 Dao 层中添加一个方法用于根据用户名返回给用于所有信息，也就是返回该用户名所匹配的那条记录。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public class MyDao &#123;</span><br><span class="line"></span><br><span class="line">    private SessionFactory sessionFactory;</span><br><span class="line">	//省略getter，setter方法</span><br><span class="line">    public UserInfo getByName(String name)&#123;</span><br><span class="line">        Session session = this.sessionFactory.openSession();</span><br><span class="line">        List list = session.createSQLQuery(&quot;SELECT * FROM logins WHERE NAME =&apos;&quot;+name+&quot;&apos;&quot;)</span><br><span class="line">                .addEntity(UserInfo.class)</span><br><span class="line">                .list();</span><br><span class="line">        session.close();</span><br><span class="line">        if(list != null &amp;&amp; list.size() != 0)&#123;</span><br><span class="line">            return (UserInfo) list.get(0);</span><br><span class="line">        &#125;else &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//Spring IOC 容器中配置一个 MyDao 实例</span><br><span class="line">&lt;bean id=&quot;myDao&quot; class=&quot;Dao.MyDao&quot;&gt;</span><br><span class="line">   &lt;property name=&quot;sessionFactory&quot; ref=&quot;sessionFactory&quot;/&gt;</span><br><span class="line">&lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>接着我们写 Service 层：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class MyService &#123;</span><br><span class="line"></span><br><span class="line">    private MyDao dao;</span><br><span class="line">	//省略getter，setter方法</span><br><span class="line">    public boolean sure(String name,String pwd)&#123;</span><br><span class="line">        UserInfo userInfo = this.dao.getByName(name);</span><br><span class="line">        if(userInfo == null)&#123;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;else &#123;</span><br><span class="line">            if(userInfo.getPwd().equals(pwd)) return true;</span><br><span class="line">            else return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//Spring IOC 容器中配置一个 Service 实例</span><br><span class="line">&lt;bean id=&quot;myService&quot; class=&quot;Service.MyService&quot;&gt;</span><br><span class="line">    &lt;property name=&quot;dao&quot; ref=&quot;myDao&quot;/&gt;</span><br><span class="line">&lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>创建 Service 实例的同时并将 MyDao 实例注入到其中，逻辑上实现了 Service 调 Dao，组件调用。下面写控制器：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public class LoginAction extends ActionSupport &#123;</span><br><span class="line"></span><br><span class="line">    private String name;</span><br><span class="line">    private String pwd;</span><br><span class="line">    private MyService service;</span><br><span class="line">	//省略getter，setter方法</span><br><span class="line">    public void setName(String name) &#123;</span><br><span class="line">        this.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String execute()&#123;</span><br><span class="line">       boolean flag = this.service.sure(name,pwd);</span><br><span class="line">       if(flag) return SUCCESS;</span><br><span class="line">       else return ERROR;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//Spring IOC 容器中配置 Action 实例</span><br><span class="line">&lt;bean id=&quot;login_Action&quot; class=&quot;Actions.LoginAction&quot; scope=&quot;prototype&quot;&gt;</span><br><span class="line">    &lt;property name=&quot;service&quot; ref=&quot;myService&quot;/&gt;</span><br><span class="line">&lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//struts.xml 中使 Action 生效</span><br><span class="line">&lt;package name=&quot;myPackage&quot; extends=&quot;struts-default&quot;&gt;</span><br><span class="line">    &lt;action name=&quot;login&quot; class=&quot;login_Action&quot;&gt;</span><br><span class="line">        &lt;result name=&quot;success&quot;&gt;/welcom.jsp&lt;/result&gt;</span><br><span class="line">        &lt;result name=&quot;error&quot;&gt;/error.jsp&lt;/result&gt;</span><br><span class="line">    &lt;/action&gt;</span><br><span class="line">&lt;/package&gt;</span><br></pre></td></tr></table></figure>
+<p>好了，我们来测试一下！</p>
+<p><img src="http://img.blog.csdn.net/20171124173357062?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"><br><img src="http://img.blog.csdn.net/20171124173405203?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p><img src="http://img.blog.csdn.net/20171124173811850?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"><br><img src="http://img.blog.csdn.net/20171124173819109?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>上述我们使用整合后的框架做了一个小案例，由于代码量较小还不能体现框架分层处理的优势，但是我们还要对其进行更深层次的解耦。</p>
+<p><strong>六、项目的模块分离与再聚合</strong></p>
+<p>上述的项目中，我们的 Dao，Service，Action 等层次的代码都处于同一个项目中，项目的模块化就是将这些层分离出去，然后再以热插拔的形式聚合回原项目，这样的话，项目中的各个组件都是一个一个的子模块，那么任意一个模块出现问题后，可以立即用一个新模块接上。这种模块化的思想已经越来越成为一种主流的思想。</p>
+<p>下面我们来介绍下，如何拆分出这些模块。</p>
+<p>首先我们要新建一个工程作为父工程，这些 Dao，Service，Action 都是它下面的子模块。打个比方来说，父工程就相当于电脑主板，Dao，Service，Action 都是热插拔在上面的内存条、硬盘等部件，主板上的资源在各个部件上都是可见的。所以我们的父工程只需要做一件事，依赖子模块所需要的所有的 jar 包。</p>
+<p><img src="http://img.blog.csdn.net/20171124192959695?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>这个父工程什么都不要有，只需要有一个 pom.xml 文件用于依赖所有需要的 jar 包即可。然后我们将上一个项目中所有需要依赖的 jar 包都添加到父工程的 pom.xml 中进行引用。</p>
+<p>然后我们选中项目创建第一个子模块 Dao，</p>
+<p><img src="http://img.blog.csdn.net/20171124193409315?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>将属于 Dao 的所有相关文件全部移植到 Dao 模块中来。</p>
+<p><img src="http://img.blog.csdn.net/20171124194031232?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>除了这些，还有一些配置在 Spring 中的代码，我们也要拷贝过来。</p>
+<p><img src="http://img.blog.csdn.net/20171124194319622?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>拷贝原先的 Spring 的配置文件并删除和我们 Dao 层无关的所有配置代码。这就完成了对 Dao 模块的分离，下面我们分离 Service 模块。</p>
+<p>第一步是一样的，先创建一个子模块然后移植过来原先项目中和 Service 相关的所有代码文件。</p>
+<p><img src="http://img.blog.csdn.net/20171124205951808?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>相关的文件拷贝后的 Service 目录结构如上图所示，但是整个 Service 模块是报错的，原因很简单，Service 现在是独立于 Dao 的，但是它又是依赖 Dao 的，所以我们只需要将 Dao 模块打包发布到本地仓库，然后 Service 通过 Maven 依赖即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;top.walkeryam&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;Dao&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>依赖 Dao 包之后就会发现项目不再报错了，最后我们分离 Action。</p>
+<p>第一步依然是创建子模块并移植过来相关的所有代码，</p>
+<p><img src="http://img.blog.csdn.net/20171124201454188?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>这里的报错和上述的原因是一样的，Action 要依赖 Service ，所以我们只要为其添加 Service 的引用即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">   &lt;groupId&gt;top.walkeryam&lt;/groupId&gt;</span><br><span class="line">   &lt;artifactId&gt;Service&lt;/artifactId&gt;</span><br><span class="line">   &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>但是还没完，这么多 Spring 配置文件，web 容器怎么知道加载哪个？<br>修改 web.xml 中有关 Spring 配置文件位置的代码：</p>
+<p><img src="http://img.blog.csdn.net/20171124202204016?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>使用通配符告诉容器加载所有类路径下符合指定规则的配置文件，这样我们各个模块中的 Spring 的配置都可以被加载了。</p>
+<p>下面我们将 Action 打成 war 包，并存放到 web 容器的项目目录下，单独运行 Action，由于 Dao 和 Service 都已经以热插拔的形式接入到 Action 中了，所以直接运行 Action 是没有问题的。</p>
+<p><img src="http://img.blog.csdn.net/20171125094007651?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>启动本地 Tomcat ，浏览器中进行测试。</p>
+<p><img src="http://img.blog.csdn.net/20171125094144410?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"><br><img src="http://img.blog.csdn.net/20171125094152772?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"><br><img src="http://img.blog.csdn.net/20171125094233725?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"><br><img src="http://img.blog.csdn.net/20171125094241098?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzUzMjY3MTg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>测试成功！那至此我们也完成了 Maven 项目的模块化拆分与聚合的操作，项目之间的各个组件耦合度降低，每个组件又都是可热插拔的，一旦哪天项目中的某个组件崩溃导致整个项目挂了，可随机替换出错的组件。</p>
+<p>模块化的思想已经越来越成熟了，不知道本篇上述的所有内容阐述的是否到位，但依然建议你深入理解整个解耦模块化的思想。总结不到之处，望指出！</p>
+
+  </section>
+
+  <section class="post-comments">
+
+    <!-- 将评论系统（例如Disqus、多说、友言、畅言等）提供的代码片段粘贴在这里 -->
+    
+</section>
+
+
+</article>
+
+
+            <footer class="footer">
+
+    <span class="footer__copyright">&copy; 2014-2015. | 由<a href="https://hexo.io/">Hexo</a>强力驱动 | 主题<a href="https://github.com/someus/huno">Huno</a></span>
+    
+</footer>
+        </div>
+    </div>
+
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+
+</body>
+</html>
